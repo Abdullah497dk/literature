@@ -15,13 +15,15 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   full_name TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'student' CHECK (role IN ('student', 'teacher', 'admin')),
+  account_status TEXT NOT NULL DEFAULT 'pending' CHECK (account_status IN ('pending', 'approved', 'rejected')),
   is_active BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Index for role and active lookups
+-- Index for role, account_status, and active lookups
 CREATE INDEX IF NOT EXISTS idx_profiles_role ON public.profiles(role);
+CREATE INDEX IF NOT EXISTS idx_profiles_account_status ON public.profiles(account_status);
 CREATE INDEX IF NOT EXISTS idx_profiles_active ON public.profiles(is_active);
 
 -- 4. CLASSES TABLE
@@ -140,6 +142,20 @@ CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON public.audit_logs(user_id);
 -- SECURITY DEFINER HELPER FUNCTIONS (PREVENTS RECURSIVE RLS)
 -- ==============================================================================
 
+CREATE OR REPLACE FUNCTION public.is_approved_user()
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COALESCE((
+    SELECT is_active = true AND account_status = 'approved' 
+    FROM public.profiles 
+    WHERE id = auth.uid()
+  ), false);
+$$;
+
 CREATE OR REPLACE FUNCTION public.get_my_role()
 RETURNS TEXT
 LANGUAGE sql
@@ -147,7 +163,7 @@ STABLE
 SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT role FROM public.profiles WHERE id = auth.uid() AND is_active = true;
+  SELECT role FROM public.profiles WHERE id = auth.uid() AND is_active = true AND account_status = 'approved';
 $$;
 
 CREATE OR REPLACE FUNCTION public.is_admin()
@@ -157,7 +173,11 @@ STABLE
 SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT COALESCE((SELECT role = 'admin' FROM public.profiles WHERE id = auth.uid() AND is_active = true), false);
+  SELECT COALESCE((
+    SELECT role = 'admin' AND is_active = true AND account_status = 'approved' 
+    FROM public.profiles 
+    WHERE id = auth.uid()
+  ), false);
 $$;
 
 CREATE OR REPLACE FUNCTION public.is_teacher()
@@ -167,7 +187,11 @@ STABLE
 SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT COALESCE((SELECT role IN ('teacher', 'admin') FROM public.profiles WHERE id = auth.uid() AND is_active = true), false);
+  SELECT COALESCE((
+    SELECT role IN ('teacher', 'admin') AND is_active = true AND account_status = 'approved' 
+    FROM public.profiles 
+    WHERE id = auth.uid()
+  ), false);
 $$;
 
 CREATE OR REPLACE FUNCTION public.has_approved_class(cid UUID)
@@ -178,10 +202,13 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
   SELECT EXISTS (
-    SELECT 1 FROM public.class_memberships
-    WHERE class_id = cid
-      AND user_id = auth.uid()
-      AND status = 'approved'
+    SELECT 1 FROM public.class_memberships cm
+    JOIN public.profiles p ON p.id = cm.user_id
+    WHERE cm.class_id = cid
+      AND cm.user_id = auth.uid()
+      AND cm.status = 'approved'
+      AND p.is_active = true
+      AND p.account_status = 'approved'
   );
 $$;
 
@@ -211,7 +238,7 @@ CREATE TRIGGER trg_protect_last_admin
   FOR EACH ROW
   EXECUTE FUNCTION public.protect_last_admin();
 
--- Prevent non-admins from changing role or is_active on profiles
+-- Prevent non-admins from changing role, account_status, or is_active on profiles
 CREATE OR REPLACE FUNCTION public.protect_profile_changes()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -221,6 +248,7 @@ AS $$
 BEGIN
   IF NOT public.is_admin() THEN
     NEW.role := OLD.role;
+    NEW.account_status := OLD.account_status;
     NEW.is_active := OLD.is_active;
   END IF;
   NEW.updated_at := now();
@@ -268,6 +296,7 @@ CREATE TRIGGER trg_handle_submission_update
   EXECUTE FUNCTION public.handle_submission_update();
 
 -- Auto-create profile on auth.users signup
+-- Enforces that self-registration always assigns role = 'student' and account_status = 'pending'.
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -275,14 +304,16 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name, role, is_active)
+  INSERT INTO public.profiles (id, full_name, role, account_status, is_active)
   VALUES (
     NEW.id,
-    COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1)),
-    COALESCE(NEW.raw_user_meta_data->>'role', 'student'),
+    COALESCE(NULLIF(TRIM(NEW.raw_user_meta_data->>'full_name'), ''), split_part(NEW.email, '@', 1)),
+    'student',
+    'pending',
     true
   )
-  ON CONFLICT (id) DO NOTHING;
+  ON CONFLICT (id) DO UPDATE
+  SET updated_at = now();
   RETURN NEW;
 END;
 $$;

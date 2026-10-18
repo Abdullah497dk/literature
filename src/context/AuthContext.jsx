@@ -70,15 +70,23 @@ export function AuthProvider({ children }) {
   const signUp = async (email, password, fullName, role = 'student') => {
     setLoading(true);
     try {
-      const { data, error } = await authService.signUp(email, password, fullName, role);
-      if (error) throw error;
+      const res = await authService.signUp(email, password, fullName, role);
+      if (res.error) throw res.error;
       await loadCurrentSession();
-      return { success: true, data };
+      return {
+        success: true,
+        data: res.data,
+        isEmailConfirmationRequired: res.isEmailConfirmationRequired
+      };
     } catch (error) {
       return { success: false, error };
     } finally {
       setLoading(false);
     }
+  };
+
+  const resendConfirmationEmail = async (email) => {
+    return await authService.resendConfirmationEmail(email);
   };
 
   const signOut = async () => {
@@ -115,16 +123,22 @@ export function AuthProvider({ children }) {
     return { success: false, error };
   };
 
+  const accountStatus = profile?.account_status || 'pending';
+  const isApproved = accountStatus === 'approved';
+
   const value = {
     user,
     profile,
     role: profile?.role || 'student',
+    accountStatus,
+    isApproved,
     isActive: profile?.is_active ?? true,
     loading,
     isSupabaseConfigured,
     signIn,
     signUp,
     signOut,
+    resendConfirmationEmail,
     switchDemoRole,
     updateProfile,
     reloadProfile: loadCurrentSession

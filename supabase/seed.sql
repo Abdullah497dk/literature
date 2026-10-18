@@ -8,12 +8,17 @@
 -- 3. Run the following command in Supabase SQL Editor:
 --
 -- UPDATE public.profiles
--- SET role = 'admin', full_name = 'Yönetici'
+-- SET role = 'admin', account_status = 'approved', full_name = 'Sistem Yöneticisi'
 -- WHERE id = 'YOUR_USER_UUID_HERE';
---
--- To provision a teacher account:
+
+-- HOW AN ADMINISTRATOR APPROVES A REGISTERED USER:
 -- UPDATE public.profiles
--- SET role = 'teacher', full_name = 'Öğretmen Adı'
+-- SET account_status = 'approved'
+-- WHERE id = 'STUDENT_USER_UUID_HERE';
+
+-- HOW AN ADMINISTRATOR ASSIGNS A TEACHER:
+-- UPDATE public.profiles
+-- SET role = 'teacher', account_status = 'approved', full_name = 'Öğretmen Adı'
 -- WHERE id = 'TEACHER_USER_UUID_HERE';
 
 -- SAMPLE STARTER CLASSES (Optional)

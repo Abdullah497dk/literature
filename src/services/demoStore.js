@@ -12,6 +12,7 @@ const INITIAL_PROFILES = [
     full_name: 'Ahmet Yılmaz',
     email: 'ogrenci@dvlp.dev',
     role: 'student',
+    account_status: 'approved',
     is_active: true,
     created_at: '2026-09-01T08:00:00Z',
     updated_at: '2026-09-01T08:00:00Z'
@@ -21,6 +22,7 @@ const INITIAL_PROFILES = [
     full_name: 'Zeynep Kaya',
     email: 'zeynep@dvlp.dev',
     role: 'student',
+    account_status: 'approved',
     is_active: true,
     created_at: '2026-09-02T09:30:00Z',
     updated_at: '2026-09-02T09:30:00Z'
@@ -30,6 +32,7 @@ const INITIAL_PROFILES = [
     full_name: 'Can Özkan',
     email: 'can@dvlp.dev',
     role: 'student',
+    account_status: 'pending',
     is_active: true,
     created_at: '2026-09-05T11:00:00Z',
     updated_at: '2026-09-05T11:00:00Z'
@@ -39,6 +42,7 @@ const INITIAL_PROFILES = [
     full_name: 'Emel Demir',
     email: 'ogretmen@dvlp.dev',
     role: 'teacher',
+    account_status: 'approved',
     is_active: true,
     created_at: '2026-08-15T08:00:00Z',
     updated_at: '2026-08-15T08:00:00Z'
@@ -48,6 +52,7 @@ const INITIAL_PROFILES = [
     full_name: 'Kemal Arslan',
     email: 'admin@dvlp.dev',
     role: 'admin',
+    account_status: 'approved',
     is_active: true,
     created_at: '2026-08-01T08:00:00Z',
     updated_at: '2026-08-01T08:00:00Z'

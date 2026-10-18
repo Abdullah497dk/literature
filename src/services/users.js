@@ -110,6 +110,36 @@ export const usersService = {
       .single();
   },
 
+  async updateAccountStatus(targetUserId, newStatus, adminUserId) {
+    if (!isSupabaseConfigured) {
+      const target = demoStore.data.profiles.find(p => p.id === targetUserId);
+      if (!target) return { data: null, error: { message: 'Kullanıcı bulunamadı' } };
+
+      target.account_status = newStatus;
+      target.updated_at = new Date().toISOString();
+
+      demoStore.data.audit_logs.push({
+        id: `aud-${Date.now()}`,
+        user_id: adminUserId,
+        action: 'account_status_changed',
+        entity_type: 'user',
+        entity_id: targetUserId,
+        details: { account_status: newStatus },
+        created_at: new Date().toISOString()
+      });
+
+      demoStore.save();
+      return { data: target, error: null };
+    }
+
+    return await supabase
+      .from('profiles')
+      .update({ account_status: newStatus, updated_at: new Date().toISOString() })
+      .eq('id', targetUserId)
+      .select()
+      .single();
+  },
+
   async deleteUser(targetUserId, adminUserId) {
     if (!isSupabaseConfigured) {
       const target = demoStore.data.profiles.find(p => p.id === targetUserId);

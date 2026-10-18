@@ -32,7 +32,21 @@ export const authService = {
       .from('profiles')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
+
+    // Safe fallback if profile record is pending provisioning:
+    if (!data && !error) {
+      return {
+        data: {
+          id: userId,
+          full_name: 'Kayıtlı Kullanıcı',
+          role: 'student',
+          account_status: 'pending',
+          is_active: true
+        },
+        error: null
+      };
+    }
 
     return { data, error };
   },
@@ -43,11 +57,10 @@ export const authService = {
       const found = demoStore.data.profiles.find(p => p.email.toLowerCase() === email.toLowerCase());
       if (found) {
         demoStore.setActiveUser(found.id);
-        return { data: { user: found }, error: null };
+        return { data: { user: found, profile: found }, error: null };
       }
-      // If user typed random email, check role hints or default to student
       const user = demoStore.getActiveUser();
-      return { data: { user }, error: null };
+      return { data: { user, profile: user }, error: null };
     }
 
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -55,14 +68,26 @@ export const authService = {
       password
     });
 
-    if (error) return { data: null, error };
+    if (error) {
+      const isEmailNotConfirmed = 
+        error.message?.toLowerCase().includes('email not confirmed') ||
+        error.code === 'email_not_confirmed' ||
+        (error.status === 400 && error.message?.toLowerCase().includes('confirm'));
 
-    // Fetch profile
-    const { data: profile, error: profileErr } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', data.user.id)
-      .single();
+      return {
+        data: null,
+        error: {
+          ...error,
+          isEmailNotConfirmed,
+          message: isEmailNotConfirmed
+            ? 'E-posta adresiniz henüz doğrulanmamış. Lütfen gelen kutunuzdaki ve spam klasörünüzdeki aktivasyon bağlantısına tıklayın.'
+            : error.message
+        }
+      };
+    }
+
+    // Fetch profile safely
+    const { data: profile } = await this.getUserProfile(data.user.id);
 
     if (profile && !profile.is_active) {
       await supabase.auth.signOut();
@@ -72,14 +97,15 @@ export const authService = {
     return { data: { ...data, profile }, error: null };
   },
 
-  async signUp(email, password, fullName, requestedRole = 'student') {
+  async signUp(email, password, fullName) {
     if (!isSupabaseConfigured) {
       const newId = `usr-${Date.now()}`;
       const newProfile = {
         id: newId,
         full_name: fullName,
         email,
-        role: requestedRole,
+        role: 'student',
+        account_status: 'pending',
         is_active: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -87,22 +113,47 @@ export const authService = {
       demoStore.data.profiles.push(newProfile);
       demoStore.setActiveUser(newId);
       demoStore.save();
-      return { data: { user: newProfile }, error: null };
+      return { data: { user: newProfile, isEmailConfirmationRequired: false }, error: null };
     }
 
-    // Role will be verified & set by database trigger
+    // Requirement 1 & 11: Normal student account, pending approval, and correct redirect URL
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo: `${window.location.origin}/login`,
         data: {
           full_name: fullName,
-          role: requestedRole
+          role: 'student'
         }
       }
     });
 
-    return { data, error };
+    if (error) return { data: null, error };
+
+    const isEmailConfirmationRequired = Boolean(data.user && !data.session);
+
+    return {
+      data: {
+        ...data,
+        isEmailConfirmationRequired
+      },
+      error: null
+    };
+  },
+
+  async resendConfirmationEmail(email) {
+    if (!isSupabaseConfigured) {
+      return { data: { message: 'Doğrulama e-postası tekrar gönderildi (Demo)' }, error: null };
+    }
+
+    return await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/login`
+      }
+    });
   },
 
   async signOut() {

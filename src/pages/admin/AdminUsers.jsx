@@ -19,7 +19,10 @@ import {
   UserX,
   Trash2,
   Edit2,
-  CheckCircle2
+  CheckCircle2,
+  Clock,
+  XCircle,
+  AlertCircle
 } from 'lucide-react';
 
 export function AdminUsers() {
@@ -30,6 +33,7 @@ export function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   // Change Role Modal
   const [roleModalOpen, setRoleModalOpen] = useState(false);
@@ -77,6 +81,19 @@ export function AdminUsers() {
     }
   };
 
+  const handleUpdateStatus = async (target, newStatus) => {
+    try {
+      const { error } = await usersService.updateAccountStatus(target.id, newStatus, user.id);
+      if (error) throw error;
+
+      const label = newStatus === 'approved' ? 'onaylandı' : newStatus === 'rejected' ? 'reddedildi' : 'onay bekliyor olarak işaretlendi';
+      showToast(`Kullanıcı hesabı başarıyla ${label}.`);
+      await loadUsers();
+    } catch (err) {
+      showToast(err.message || 'Hesap durumu güncellenemedi.', 'danger');
+    }
+  };
+
   const handleToggleActive = async (target) => {
     try {
       const { error } = await usersService.toggleUserActive(target.id, target.is_active, user.id);
@@ -106,8 +123,12 @@ export function AdminUsers() {
     }
   };
 
+  const pendingCount = users.filter(u => u.account_status === 'pending').length;
+
   const filteredUsers = users.filter(u => {
     if (roleFilter !== 'all' && u.role !== roleFilter) return false;
+    const userStatus = u.account_status || 'approved';
+    if (statusFilter !== 'all' && userStatus !== statusFilter) return false;
     if (search) {
       const q = search.toLowerCase();
       const name = (u.full_name || '').toLowerCase();
@@ -132,19 +153,51 @@ export function AdminUsers() {
     }
   };
 
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="warning" size="sm">Onay Bekliyor</Badge>;
+      case 'rejected':
+        return <Badge variant="danger" size="sm">Reddedildi</Badge>;
+      case 'approved':
+      default:
+        return <Badge variant="success" size="sm">Onaylandı</Badge>;
+    }
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 600 }}>Kullanıcı ve Rol Yönetimi</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.3rem' }}>
+            <h1 style={{ fontSize: '1.6rem', fontWeight: 600 }}>Kullanıcı ve Rol Yönetimi</h1>
+            {pendingCount > 0 && (
+              <span 
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  padding: '0.2rem 0.65rem',
+                  borderRadius: '9999px',
+                  backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                  border: '1px solid rgba(245, 158, 11, 0.3)',
+                  color: '#fbbf24',
+                  fontSize: '0.75rem',
+                  fontWeight: 600
+                }}
+              >
+                <Clock size={12} /> {pendingCount} Onay Bekliyor
+              </span>
+            )}
+          </div>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            Sistemdeki tüm öğrenci, öğretmen ve yönetici hesaplarını denetleyin.
+            Sistemdeki tüm öğrenci, öğretmen ve yönetici hesaplarını denetleyin ve onaylayın.
           </p>
         </div>
 
         {/* Filters */}
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <div style={{ position: 'relative', width: '240px' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ position: 'relative', width: '220px' }}>
             <Search size={15} style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input
               type="text"
@@ -158,7 +211,7 @@ export function AdminUsers() {
 
           <select
             className="dvlp-select"
-            style={{ width: '140px', height: '38px', fontSize: '0.85rem', padding: '0.4rem 0.75rem' }}
+            style={{ width: '135px', height: '38px', fontSize: '0.85rem', padding: '0.4rem 0.75rem' }}
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
           >
@@ -166,6 +219,18 @@ export function AdminUsers() {
             <option value="student">Öğrenciler</option>
             <option value="teacher">Öğretmenler</option>
             <option value="admin">Yöneticiler</option>
+          </select>
+
+          <select
+            className="dvlp-select"
+            style={{ width: '150px', height: '38px', fontSize: '0.85rem', padding: '0.4rem 0.75rem' }}
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="all">Tüm Durumlar</option>
+            <option value="pending">Onay Bekleyenler</option>
+            <option value="approved">Onaylananlar</option>
+            <option value="rejected">Reddedilenler</option>
           </select>
         </div>
       </div>
@@ -178,7 +243,8 @@ export function AdminUsers() {
               <th>Kullanıcı</th>
               <th>E-posta</th>
               <th>Mevcut Rol</th>
-              <th>Durum</th>
+              <th>Hesap Onayı</th>
+              <th>Aktiflik</th>
               <th>Kayıt Tarihi</th>
               <th style={{ textAlign: 'right' }}>İşlemler</th>
             </tr>
@@ -220,6 +286,7 @@ export function AdminUsers() {
                   {u.email || '—'}
                 </td>
                 <td>{getRoleBadge(u.role)}</td>
+                <td>{getStatusBadge(u.account_status || 'approved')}</td>
                 <td>
                   {u.is_active ? (
                     <Badge variant="success" size="sm">Aktif</Badge>
@@ -231,7 +298,56 @@ export function AdminUsers() {
                   {new Date(u.created_at).toLocaleDateString('tr-TR')}
                 </td>
                 <td style={{ textAlign: 'right' }}>
-                  <div style={{ display: 'inline-flex', gap: '0.4rem' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                    {u.account_status === 'pending' && (
+                      <button
+                        type="button"
+                        className="dvlp-btn dvlp-btn-sm"
+                        style={{
+                          backgroundColor: 'rgba(34, 197, 94, 0.15)',
+                          color: '#4ade80',
+                          border: '1px solid rgba(34, 197, 94, 0.3)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.3rem'
+                        }}
+                        onClick={() => handleUpdateStatus(u, 'approved')}
+                        title="Hesabı Onayla"
+                      >
+                        <CheckCircle2 size={13} /> Onayla
+                      </button>
+                    )}
+
+                    {u.account_status === 'rejected' && (
+                      <button
+                        type="button"
+                        className="dvlp-btn dvlp-btn-sm"
+                        style={{
+                          backgroundColor: 'rgba(34, 197, 94, 0.15)',
+                          color: '#4ade80',
+                          border: '1px solid rgba(34, 197, 94, 0.3)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.3rem'
+                        }}
+                        onClick={() => handleUpdateStatus(u, 'approved')}
+                        title="Yeniden Onayla"
+                      >
+                        <CheckCircle2 size={13} /> Onayla
+                      </button>
+                    )}
+
+                    {u.account_status === 'pending' && (
+                      <button
+                        type="button"
+                        className="dvlp-btn dvlp-btn-ghost dvlp-btn-sm"
+                        onClick={() => handleUpdateStatus(u, 'rejected')}
+                        title="Başvuruyu Reddet"
+                      >
+                        <XCircle size={14} style={{ color: 'var(--color-danger)' }} />
+                      </button>
+                    )}
+
                     <button
                       type="button"
                       className="dvlp-btn dvlp-btn-secondary dvlp-btn-sm"
