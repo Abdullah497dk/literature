@@ -1,0 +1,11 @@
+<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="dvlp-grad" x1="14" y1="8" x2="52" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#22D3EE"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#09090B"/>
+  <path d="M16 10 H34 C45 10 54 20 54 32 C54 44 45 54 34 54 H16 Z M24 18 H33 C41 18 46 24 46 32 C46 40 41 46 33 46 H24 Z" fill="url(#dvlp-grad)" fill-rule="evenodd"/>
+  <path d="M29 45 L40 30 L42.5 33 L44 21 L32.5 23 L35.5 26 L25 41 Z" fill="url(#dvlp-grad)"/>
+</svg>
