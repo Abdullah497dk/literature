@@ -36,6 +36,15 @@ export const authService = {
 
     // Safe fallback if profile record is pending provisioning:
     if (!data && !error) {
+      try {
+        const { data: provisioned } = await supabase.rpc('provision_my_profile');
+        if (provisioned) {
+          return { data: provisioned, error: null };
+        }
+      } catch (e) {
+        // RPC may not be installed yet; fallback safely
+      }
+
       return {
         data: {
           id: userId,

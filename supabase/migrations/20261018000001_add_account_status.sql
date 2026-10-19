@@ -25,6 +25,19 @@ UPDATE public.profiles
 SET account_status = 'approved'
 WHERE role IN ('admin', 'teacher') OR account_status IS NULL;
 
+-- 3b. Backfill profile records for any users in auth.users that do not have a profiles row
+INSERT INTO public.profiles (id, full_name, role, account_status, is_active)
+SELECT 
+  u.id,
+  COALESCE(NULLIF(TRIM(u.raw_user_meta_data->>'full_name'), ''), split_part(u.email, '@', 1)),
+  'student',
+  'pending',
+  true
+FROM auth.users u
+LEFT JOIN public.profiles p ON p.id = u.id
+WHERE p.id IS NULL
+ON CONFLICT (id) DO NOTHING;
+
 -- 4. Secure handle_new_user trigger function
 -- Enforces that self-registration always assigns role = 'student' and account_status = 'pending'.
 -- User metadata is NEVER trusted for role promotion or approval bypass.
@@ -79,6 +92,45 @@ CREATE TRIGGER trg_protect_profile_changes
   BEFORE UPDATE ON public.profiles
   FOR EACH ROW
   EXECUTE FUNCTION public.protect_profile_changes();
+
+-- 5b. Safe self-healing RPC function for authenticated users
+CREATE OR REPLACE FUNCTION public.provision_my_profile()
+RETURNS public.profiles
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  prof public.profiles;
+  u auth.users%ROWTYPE;
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
+
+  SELECT * INTO prof FROM public.profiles WHERE id = auth.uid();
+  IF FOUND THEN
+    RETURN prof;
+  END IF;
+
+  SELECT * INTO u FROM auth.users WHERE id = auth.uid();
+
+  INSERT INTO public.profiles (id, full_name, role, account_status, is_active)
+  VALUES (
+    auth.uid(),
+    COALESCE(NULLIF(TRIM(u.raw_user_meta_data->>'full_name'), ''), split_part(u.email, '@', 1)),
+    'student',
+    'pending',
+    true
+  )
+  ON CONFLICT (id) DO UPDATE SET updated_at = now()
+  RETURNING * INTO prof;
+
+  RETURN prof;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.provision_my_profile() TO authenticated;
 
 -- 6. Helper Security Functions (SECURITY DEFINER)
 CREATE OR REPLACE FUNCTION public.is_approved_user()
@@ -220,7 +272,11 @@ CREATE POLICY "Students can insert their own submissions in approved classes"
     public.is_approved_user() AND student_id = auth.uid() AND public.has_approved_class(class_id)
   );
 
--- 12. Storage Policies
+-- 12. Storage Bucket & Policies
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('homework-submissions', 'homework-submissions', false)
+ON CONFLICT (id) DO NOTHING;
+
 DROP POLICY IF EXISTS "Storage: Homework PDFs viewable by class members and teachers" ON storage.objects;
 CREATE POLICY "Storage: Homework PDFs viewable by class members and teachers"
   ON storage.objects FOR SELECT
@@ -235,6 +291,33 @@ CREATE POLICY "Storage: Homework PDFs viewable by class members and teachers"
         WHERE s.file_path = storage.objects.name
           AND s.deleted_at IS NULL
           AND public.has_approved_class(s.class_id)
+      )
+    )
+  );
+
+DROP POLICY IF EXISTS "Storage: Students and teachers can upload PDFs" ON storage.objects;
+CREATE POLICY "Storage: Students and teachers can upload PDFs"
+  ON storage.objects FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    bucket_id = 'homework-submissions'
+    AND public.is_approved_user()
+  );
+
+DROP POLICY IF EXISTS "Storage: Students can delete their own unreviewed files" ON storage.objects;
+CREATE POLICY "Storage: Students can delete their own unreviewed files"
+  ON storage.objects FOR DELETE
+  TO authenticated
+  USING (
+    bucket_id = 'homework-submissions'
+    AND public.is_approved_user()
+    AND (
+      public.is_teacher()
+      OR EXISTS (
+        SELECT 1 FROM public.submissions s
+        WHERE s.file_path = storage.objects.name
+          AND s.student_id = auth.uid()
+          AND s.review_status = 'not_reviewed'
       )
     )
   );

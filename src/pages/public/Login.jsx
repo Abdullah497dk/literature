@@ -7,10 +7,11 @@ import { Button } from '../../components/common/Button';
 import { Mail, Lock, User, ArrowRight, Shield, BookOpen, GraduationCap, AlertCircle, RefreshCw, CheckCircle2 } from 'lucide-react';
 
 export function Login() {
+  const { signIn, signUp, resendConfirmationEmail, isSupabaseConfigured, switchDemoRole } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
-  const [email, setEmail] = useState('ogrenci@dvlp.dev');
-  const [password, setPassword] = useState('dvlp123456');
-  const [fullName, setFullName] = useState('Ahmet Yılmaz');
+  const [email, setEmail] = useState(isSupabaseConfigured ? '' : 'ogrenci@dvlp.dev');
+  const [password, setPassword] = useState(isSupabaseConfigured ? '' : 'dvlp123456');
+  const [fullName, setFullName] = useState(isSupabaseConfigured ? '' : 'Ahmet Yılmaz');
   const [roleSelection, setRoleSelection] = useState('student');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -21,7 +22,6 @@ export function Login() {
   const [resendingEmail, setResendingEmail] = useState(false);
   const [resendStatus, setResendStatus] = useState(null);
 
-  const { signIn, signUp, resendConfirmationEmail, isSupabaseConfigured, switchDemoRole } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/dashboard';
