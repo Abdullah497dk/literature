@@ -6,7 +6,7 @@ import { Card } from '../../components/common/Card';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
-import { Inbox, CheckCircle2, XCircle, Clock, User, Layers } from 'lucide-react';
+import { Inbox, CheckCircle2, XCircle, Clock, User, Layers, RefreshCw, AlertCircle } from 'lucide-react';
 
 export function TeacherRequests() {
   const { user } = useAuth();
@@ -14,15 +14,24 @@ export function TeacherRequests() {
 
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState([]);
+  const [errorMessage, setErrorMessage] = useState('');
   const [actionLoadingId, setActionLoadingId] = useState(null);
 
   const loadRequests = async () => {
     setLoading(true);
+    setErrorMessage('');
     try {
-      const { data } = await classesService.getAllPendingRequests();
-      setRequests(data || []);
+      const { data, error } = await classesService.getAllPendingRequests();
+      if (error) {
+        console.error('TeacherRequests load error', error);
+        setErrorMessage(error.message || 'Talepler yüklenirken bir sorun oluştu.');
+        setRequests([]);
+      } else {
+        setRequests(data || []);
+      }
     } catch (e) {
-      console.error('TeacherRequests load error', e);
+      console.error('TeacherRequests exception', e);
+      setErrorMessage(e.message || 'Beklenmeyen bir hata oluştu.');
     } finally {
       setLoading(false);
     }
@@ -53,12 +62,36 @@ export function TeacherRequests() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '900px', margin: '0 auto' }}>
-      <div>
-        <h1 style={{ fontSize: '1.6rem', fontWeight: 600 }}>Sınıf Katılım Talepleri</h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-          Sınıf kodunu girerek şubenize katılmak isteyen öğrencilerin onay bekleyen başvuruları.
-        </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 600 }}>Sınıf Katılım Talepleri</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+            Sınıf kodunu girerek şubenize katılmak isteyen öğrencilerin onay bekleyen başvuruları.
+          </p>
+        </div>
+        <Button variant="secondary" size="sm" icon={RefreshCw} onClick={loadRequests}>
+          Yenile
+        </Button>
       </div>
+
+      {errorMessage && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.6rem',
+            padding: '0.75rem 1rem',
+            backgroundColor: 'var(--color-danger-bg)',
+            border: '1px solid var(--color-danger-border)',
+            borderRadius: '12px',
+            color: '#f87171',
+            fontSize: '0.85rem'
+          }}
+        >
+          <AlertCircle size={18} style={{ flexShrink: 0 }} />
+          <span>{errorMessage}</span>
+        </div>
+      )}
 
       {requests.length === 0 ? (
         <Card style={{ padding: '3rem', textAlign: 'center' }}>

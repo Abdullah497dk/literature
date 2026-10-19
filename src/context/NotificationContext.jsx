@@ -28,6 +28,10 @@ export function NotificationProvider({ children }) {
 
   useEffect(() => {
     fetchNotifications();
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 20000);
+    return () => clearInterval(interval);
   }, [fetchNotifications]);
 
   const unreadCount = notifications.filter(n => !n.read_at).length;

@@ -385,3 +385,82 @@ CREATE POLICY "Storage: Students can delete their own unreviewed files"
       )
     )
   );
+
+-- 13. Automatic Notifications for Class Membership Requests & Approvals
+CREATE OR REPLACE FUNCTION public.handle_membership_notifications()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_class_name TEXT;
+  v_teacher_id UUID;
+  v_student_name TEXT;
+  v_admin_record RECORD;
+BEGIN
+  -- When a new pending request is inserted
+  IF (TG_OP = 'INSERT' AND NEW.status = 'pending') THEN
+    SELECT name, created_by INTO v_class_name, v_teacher_id
+    FROM public.classes WHERE id = NEW.class_id;
+
+    SELECT full_name INTO v_student_name
+    FROM public.profiles WHERE id = NEW.user_id;
+
+    -- Notify Teacher (if exists)
+    IF v_teacher_id IS NOT NULL THEN
+      INSERT INTO public.notifications (recipient_id, type, title, message, class_id)
+      VALUES (
+        v_teacher_id,
+        'membership_request',
+        'Yeni Sınıf Katılım Talebi',
+        COALESCE(v_student_name, 'Bir öğrenci') || ', "' || COALESCE(v_class_name, 'Sınıf') || '" şubesine katılmak için onay bekliyor.',
+        NEW.class_id
+      );
+    END IF;
+
+    -- Notify Admins
+    FOR v_admin_record IN 
+      SELECT id FROM public.profiles 
+      WHERE role = 'admin' 
+        AND is_active = true 
+        AND account_status = 'approved' 
+        AND id <> COALESCE(v_teacher_id, '00000000-0000-0000-0000-000000000000'::uuid)
+    LOOP
+      INSERT INTO public.notifications (recipient_id, type, title, message, class_id)
+      VALUES (
+        v_admin_record.id,
+        'membership_request',
+        'Yeni Sınıf Katılım Talebi',
+        COALESCE(v_student_name, 'Bir öğrenci') || ', "' || COALESCE(v_class_name, 'Sınıf') || '" şubesine katılmak için onay bekliyor.',
+        NEW.class_id
+      );
+    END LOOP;
+
+  -- When request is approved or rejected
+  ELSIF (TG_OP = 'UPDATE' AND OLD.status = 'pending' AND NEW.status IN ('approved', 'rejected')) THEN
+    SELECT name INTO v_class_name FROM public.classes WHERE id = NEW.class_id;
+
+    INSERT INTO public.notifications (recipient_id, type, title, message, class_id)
+    VALUES (
+      NEW.user_id,
+      CASE WHEN NEW.status = 'approved' THEN 'membership_approved' ELSE 'membership_rejected' END,
+      CASE WHEN NEW.status = 'approved' THEN 'Sınıf Katılım Talebi Onaylandı' ELSE 'Sınıf Katılım Talebi Reddedildi' END,
+      CASE WHEN NEW.status = 'approved' 
+        THEN '"' || COALESCE(v_class_name, 'Sınıf') || '" sınıfına katılım talebiniz onaylandı.'
+        ELSE '"' || COALESCE(v_class_name, 'Sınıf') || '" sınıfına katılım talebiniz reddedildi.'
+      END,
+      NEW.class_id
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trigger_membership_notifications ON public.class_memberships;
+CREATE TRIGGER trigger_membership_notifications
+  AFTER INSERT OR UPDATE ON public.class_memberships
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_membership_notifications();
+
