@@ -77,11 +77,23 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
+  -- If executed via PostgreSQL superuser / SQL Editor / backend service_role / migrations, allow all modifications
+  IF current_user IN ('postgres', 'supabase_admin') 
+     OR (auth.jwt() ->> 'role') = 'service_role' 
+     OR auth.role() = 'service_role' 
+     OR auth.uid() IS NULL THEN
+    NEW.updated_at := now();
+    RETURN NEW;
+  END IF;
+
+  -- For client requests through Supabase Auth (role = 'authenticated'):
+  -- Only approved admins can alter role, account_status, or is_active
   IF NOT public.is_admin() THEN
     NEW.role := OLD.role;
     NEW.account_status := OLD.account_status;
     NEW.is_active := OLD.is_active;
   END IF;
+
   NEW.updated_at := now();
   RETURN NEW;
 END;
@@ -132,6 +144,50 @@ $$;
 
 GRANT EXECUTE ON FUNCTION public.provision_my_profile() TO authenticated;
 
+-- 5c. Safe administrator assignment helper for Supabase SQL Editor
+CREATE OR REPLACE FUNCTION public.assign_admin(user_email TEXT)
+RETURNS JSON
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  target_user auth.users%ROWTYPE;
+  target_profile public.profiles%ROWTYPE;
+BEGIN
+  SELECT * INTO target_user FROM auth.users WHERE LOWER(email) = LOWER(TRIM(user_email));
+  IF target_user.id IS NULL THEN
+    RAISE EXCEPTION 'Kullanıcı auth.users tablosunda bulunamadı: %', user_email;
+  END IF;
+
+  INSERT INTO public.profiles (id, full_name, role, account_status, is_active, updated_at)
+  VALUES (
+    target_user.id,
+    COALESCE(NULLIF(TRIM(target_user.raw_user_meta_data->>'full_name'), ''), split_part(target_user.email, '@', 1)),
+    'admin',
+    'approved',
+    true,
+    now()
+  )
+  ON CONFLICT (id) DO UPDATE
+  SET 
+    role = 'admin',
+    account_status = 'approved',
+    is_active = true,
+    updated_at = now()
+  RETURNING * INTO target_profile;
+
+  RETURN json_build_object(
+    'success', true,
+    'user_id', target_profile.id,
+    'email', user_email,
+    'role', target_profile.role,
+    'account_status', target_profile.account_status,
+    'is_active', target_profile.is_active
+  );
+END;
+$$;
+
 -- 6. Helper Security Functions (SECURITY DEFINER)
 CREATE OR REPLACE FUNCTION public.is_approved_user()
 RETURNS BOOLEAN
@@ -140,11 +196,15 @@ STABLE
 SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT COALESCE((
-    SELECT is_active = true AND account_status = 'approved' 
-    FROM public.profiles 
-    WHERE id = auth.uid()
-  ), false);
+  SELECT CASE
+    WHEN current_user IN ('postgres', 'supabase_admin') THEN true
+    WHEN (auth.jwt() ->> 'role') = 'service_role' OR auth.role() = 'service_role' THEN true
+    ELSE COALESCE((
+      SELECT is_active = true AND account_status = 'approved' 
+      FROM public.profiles 
+      WHERE id = auth.uid()
+    ), false)
+  END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.is_admin()
@@ -154,11 +214,15 @@ STABLE
 SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT COALESCE((
-    SELECT role = 'admin' AND is_active = true AND account_status = 'approved' 
-    FROM public.profiles 
-    WHERE id = auth.uid()
-  ), false);
+  SELECT CASE
+    WHEN current_user IN ('postgres', 'supabase_admin') THEN true
+    WHEN (auth.jwt() ->> 'role') = 'service_role' OR auth.role() = 'service_role' THEN true
+    ELSE COALESCE((
+      SELECT role = 'admin' AND is_active = true AND account_status = 'approved' 
+      FROM public.profiles 
+      WHERE id = auth.uid()
+    ), false)
+  END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.is_teacher()

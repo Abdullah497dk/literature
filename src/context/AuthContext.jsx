@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authService } from '../services/auth';
-import { isSupabaseConfigured } from '../services/supabase';
+import { supabase, isSupabaseConfigured } from '../services/supabase';
 import { demoStore } from '../services/demoStore';
 
 const AuthContext = createContext(null);
@@ -123,6 +123,22 @@ export function AuthProvider({ children }) {
     return { success: false, error };
   };
 
+  const reloadProfile = async () => {
+    setLoading(true);
+    try {
+      if (isSupabaseConfigured && supabase) {
+        try {
+          await supabase.auth.refreshSession();
+        } catch (e) {
+          console.warn('Session refresh warning:', e);
+        }
+      }
+      await loadCurrentSession();
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const accountStatus = profile?.account_status || 'pending';
   const isApproved = accountStatus === 'approved';
 
@@ -141,7 +157,7 @@ export function AuthProvider({ children }) {
     resendConfirmationEmail,
     switchDemoRole,
     updateProfile,
-    reloadProfile: loadCurrentSession
+    reloadProfile
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

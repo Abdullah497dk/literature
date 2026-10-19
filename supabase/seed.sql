@@ -2,24 +2,18 @@
 -- DVLP EDEBIYAT — SEED DATA & ADMIN PROVISIONING
 -- ==============================================================================
 
--- HOW TO CREATE AN INITIAL ADMINISTRATOR:
--- 1. Create a user via Supabase Auth dashboard (Authentication -> Add User) or sign up in the app with your email and password.
--- 2. Obtain your User ID (UUID) from auth.users or profiles.
--- 3. Run the following command in Supabase SQL Editor:
+-- HOW TO ASSIGN AN ADMINISTRATOR VIA SUPABASE SQL EDITOR:
+-- Method A (Recommended - single function call):
+-- SELECT public.assign_admin('your_email@gmail.com');
 --
+-- Method B (Direct SQL UPDATE):
 -- UPDATE public.profiles
--- SET role = 'admin', account_status = 'approved', full_name = 'Sistem Yöneticisi'
--- WHERE id = 'YOUR_USER_UUID_HERE';
-
--- HOW AN ADMINISTRATOR APPROVES A REGISTERED USER:
--- UPDATE public.profiles
--- SET account_status = 'approved'
--- WHERE id = 'STUDENT_USER_UUID_HERE';
-
--- HOW AN ADMINISTRATOR ASSIGNS A TEACHER:
--- UPDATE public.profiles
--- SET role = 'teacher', account_status = 'approved', full_name = 'Öğretmen Adı'
--- WHERE id = 'TEACHER_USER_UUID_HERE';
+-- SET role = 'admin', account_status = 'approved', is_active = true
+-- WHERE id = (SELECT id FROM auth.users WHERE LOWER(email) = 'your_email@gmail.com');
+--
+-- VERIFICATION QUERY:
+-- SELECT id, full_name, role, account_status, is_active FROM public.profiles 
+-- WHERE id = (SELECT id FROM auth.users WHERE LOWER(email) = 'your_email@gmail.com');
 
 -- SAMPLE STARTER CLASSES (Optional)
 -- Run this after setting up tables if you want default classes ready:
