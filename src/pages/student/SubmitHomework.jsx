@@ -289,8 +289,18 @@ export function SubmitHomework() {
                   <div style={{ color: 'var(--color-success)' }}>
                     <FileCheck size={32} />
                   </div>
-                  <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.95rem' }}>
+                  <div style={{ textAlign: 'left', minWidth: 0, maxWidth: '280px' }}>
+                    <div 
+                      style={{ 
+                        fontWeight: 600, 
+                        color: 'var(--text-primary)', 
+                        fontSize: '0.95rem',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}
+                      title={selectedFile.name}
+                    >
                       {selectedFile.name}
                     </div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>

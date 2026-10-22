@@ -251,9 +251,20 @@ export function SubmissionDetail() {
                   {(submission.file_size / (1024 * 1024)).toFixed(2)} MB
                 </span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Dosya Adı:</span>
-                <span style={{ color: 'var(--accent-cyan)', fontWeight: 500 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem' }}>
+                <span style={{ color: 'var(--text-muted)', flexShrink: 0 }}>Dosya Adı:</span>
+                <span 
+                  style={{ 
+                    color: 'var(--accent-cyan)', 
+                    fontWeight: 500,
+                    maxWidth: '220px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    textAlign: 'right'
+                  }}
+                  title={submission.original_filename}
+                >
                   {submission.original_filename}
                 </span>
               </div>
@@ -403,9 +414,21 @@ export function SubmissionDetail() {
                 onChange={(e) => setNewFile(e.target.files?.[0] || null)}
               />
               {newFile ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'var(--color-success)' }}>
-                  <FileCheck size={20} />
-                  <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{newFile.name} seçildi</span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'var(--color-success)', minWidth: 0 }}>
+                  <FileCheck size={20} style={{ flexShrink: 0 }} />
+                  <span 
+                    style={{ 
+                      fontSize: '0.9rem', 
+                      fontWeight: 500, 
+                      maxWidth: '280px', 
+                      overflow: 'hidden', 
+                      textOverflow: 'ellipsis', 
+                      whiteSpace: 'nowrap' 
+                    }}
+                    title={newFile.name}
+                  >
+                    {newFile.name} seçildi
+                  </span>
                 </div>
               ) : (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>

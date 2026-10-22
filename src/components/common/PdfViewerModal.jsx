@@ -35,7 +35,18 @@ export function PdfViewerModal({
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
             <FileText size={20} style={{ color: 'var(--accent-purple)' }} />
             <div>
-              <div style={{ fontWeight: 500, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
+              <div 
+                style={{ 
+                  fontWeight: 500, 
+                  color: 'var(--text-primary)', 
+                  fontSize: '0.9rem',
+                  maxWidth: '320px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}
+                title={filename || 'odev.pdf'}
+              >
                 {filename || 'odev.pdf'}
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>

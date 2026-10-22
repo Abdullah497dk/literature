@@ -24,7 +24,8 @@ export function Sidebar({ isOpen, onClose }) {
     { to: '/my-class', label: 'Sınıfım', icon: GraduationCap },
     { to: '/submissions/new', label: 'Ödev Yükle', icon: UploadCloud },
     { to: '/notifications', label: 'Bildirimler', icon: Bell },
-    { to: '/profile', label: 'Profilim', icon: User }
+    { to: '/profile', label: 'Profilim', icon: User },
+    { to: '/settings', label: 'Ayarlar', icon: Settings }
   ];
 
   const teacherLinks = [
@@ -33,7 +34,8 @@ export function Sidebar({ isOpen, onClose }) {
     { to: '/teacher/assignments', label: 'Ödev Başlıkları', icon: BookOpen },
     { to: '/teacher/requests', label: 'Katılım Talepleri', icon: Inbox },
     { to: '/notifications', label: 'Bildirimler', icon: Bell },
-    { to: '/profile', label: 'Profilim', icon: User }
+    { to: '/profile', label: 'Profilim', icon: User },
+    { to: '/settings', label: 'Ayarlar', icon: Settings }
   ];
 
   const adminLinks = [
@@ -44,7 +46,8 @@ export function Sidebar({ isOpen, onClose }) {
     { to: '/admin/requests', label: 'Katılım Talepleri', icon: Inbox },
     { to: '/admin/submissions', label: 'Tüm Ödevler', icon: FileCheck2 },
     { to: '/notifications', label: 'Bildirimler', icon: Bell },
-    { to: '/profile', label: 'Profilim', icon: User }
+    { to: '/profile', label: 'Profilim', icon: User },
+    { to: '/settings', label: 'Ayarlar', icon: Settings }
   ];
 
   const links = role === 'admin' ? adminLinks : role === 'teacher' ? teacherLinks : studentLinks;

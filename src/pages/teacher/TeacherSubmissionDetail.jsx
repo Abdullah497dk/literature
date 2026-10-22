@@ -196,20 +196,57 @@ export function TeacherSubmissionDetail() {
       </div>
 
       {/* Main Grid: Left PDF, Right Review Panel */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.25fr) minmax(360px, 1fr)', gap: '1.5rem' }}>
+      <div 
+        style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 460px), 1fr))', 
+          gap: '1.5rem',
+          alignItems: 'start'
+        }}
+      >
         {/* PDF Frame */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <FileText size={16} /> {submission.original_filename} ({(submission.file_size / (1024 * 1024)).toFixed(2)} MB)
-            </span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', minWidth: 0 }}>
+          <div 
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              gap: '0.75rem',
+              minWidth: 0,
+              background: 'var(--bg-secondary)',
+              padding: '0.6rem 0.85rem',
+              borderRadius: '12px',
+              border: '1px solid var(--border-color-subtle)'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 0, flex: 1 }}>
+              <FileText size={16} style={{ color: 'var(--accent-purple)', flexShrink: 0 }} />
+              <span 
+                style={{ 
+                  fontSize: '0.85rem', 
+                  color: 'var(--text-primary)', 
+                  fontWeight: 500,
+                  overflow: 'hidden', 
+                  textOverflow: 'ellipsis', 
+                  whiteSpace: 'nowrap',
+                  minWidth: 0
+                }}
+                title={submission.original_filename}
+              >
+                {submission.original_filename}
+              </span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', flexShrink: 0 }}>
+                ({(submission.file_size / (1024 * 1024)).toFixed(2)} MB)
+              </span>
+            </div>
+
             {signedPdfUrl && (
               <a
                 href={signedPdfUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="dvlp-btn dvlp-btn-secondary dvlp-btn-sm"
-                style={{ textDecoration: 'none' }}
+                style={{ textDecoration: 'none', flexShrink: 0 }}
               >
                 <ExternalLink size={14} /> Yeni Sekmede Aç
               </a>

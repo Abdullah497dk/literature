@@ -415,7 +415,7 @@ export function StudentDashboard() {
                           {sub.assignment?.title || 'Ödev'}
                         </Link>
                       </td>
-                      <td>
+                      <td style={{ maxWidth: '220px' }}>
                         <button
                           type="button"
                           onClick={() => openPdfViewer(sub)}
@@ -427,10 +427,17 @@ export function StudentDashboard() {
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '0.35rem',
-                            fontSize: '0.85rem'
+                            fontSize: '0.85rem',
+                            maxWidth: '100%',
+                            overflow: 'hidden',
+                            textAlign: 'left'
                           }}
+                          title={sub.original_filename}
                         >
-                          <FileText size={15} /> {sub.original_filename}
+                          <FileText size={15} style={{ flexShrink: 0 }} />
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {sub.original_filename}
+                          </span>
                         </button>
                       </td>
                       <td>{createdDate}</td>
@@ -531,7 +538,16 @@ export function StudentDashboard() {
                     <h4 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '0.25rem' }}>
                       {activitySub.assignment?.title || 'Edebiyat Ödevi'}
                     </h4>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    <p 
+                      style={{ 
+                        fontSize: '0.8rem', 
+                        color: 'var(--text-muted)',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}
+                      title={activitySub.original_filename}
+                    >
                       Dosya: {activitySub.original_filename}
                     </p>
                   </div>

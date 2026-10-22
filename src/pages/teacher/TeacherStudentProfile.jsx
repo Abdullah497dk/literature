@@ -195,7 +195,19 @@ export function TeacherStudentProfile() {
                         {sub.updated_at !== sub.created_at && (
                           <span>• Son Düzenleme: {new Date(sub.updated_at).toLocaleString('tr-TR')}</span>
                         )}
-                        <span>• {sub.original_filename}</span>
+                        <span 
+                          style={{ 
+                            maxWidth: '220px', 
+                            overflow: 'hidden', 
+                            textOverflow: 'ellipsis', 
+                            whiteSpace: 'nowrap',
+                            display: 'inline-block',
+                            verticalAlign: 'middle'
+                          }}
+                          title={sub.original_filename}
+                        >
+                          • {sub.original_filename}
+                        </span>
                       </div>
                     </div>
 

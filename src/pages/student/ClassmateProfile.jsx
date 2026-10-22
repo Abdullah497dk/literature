@@ -174,7 +174,19 @@ export function ClassmateProfile() {
                         <Calendar size={13} /> {new Date(sub.created_at).toLocaleDateString('tr-TR')}
                       </span>
                       <span>•</span>
-                      <span>{sub.original_filename}</span>
+                      <span 
+                        style={{ 
+                          maxWidth: '200px', 
+                          overflow: 'hidden', 
+                          textOverflow: 'ellipsis', 
+                          whiteSpace: 'nowrap',
+                          display: 'inline-block',
+                          verticalAlign: 'middle'
+                        }}
+                        title={sub.original_filename}
+                      >
+                        {sub.original_filename}
+                      </span>
                     </div>
                   </div>
                 </div>

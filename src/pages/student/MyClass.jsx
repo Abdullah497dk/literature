@@ -329,8 +329,20 @@ export function MyClass() {
                       </Link>
                     </td>
                     <td>{sub.assignment?.title || 'Ödev'}</td>
-                    <td>
-                      <span style={{ fontSize: '0.85rem', color: 'var(--accent-cyan)' }}>
+                    <td style={{ maxWidth: '200px' }}>
+                      <span 
+                        style={{ 
+                          fontSize: '0.85rem', 
+                          color: 'var(--accent-cyan)',
+                          display: 'inline-block',
+                          maxWidth: '100%',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          verticalAlign: 'middle'
+                        }}
+                        title={sub.original_filename}
+                      >
                         {sub.original_filename}
                       </span>
                     </td>
