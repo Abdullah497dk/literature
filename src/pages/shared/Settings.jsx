@@ -14,8 +14,6 @@ import {
   Bell,
   Moon,
   Smartphone,
-  Eye,
-  EyeOff,
   Trash2,
   CheckCircle2,
   FileText,
@@ -62,7 +60,6 @@ export function Settings() {
     };
   });
 
-  const [showApiKey, setShowApiKey] = useState(false);
   const [clearingCache, setClearingCache] = useState(false);
 
   useEffect(() => {
@@ -556,100 +553,64 @@ export function Settings() {
             </div>
           </Card>
 
-          {/* Supabase Connection Status */}
+          {/* Platform Connection Status - does NOT expose backend tech details */}
           <Card style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <Database size={22} style={{ color: 'var(--accent-purple)' }} />
+                <Server size={22} style={{ color: 'var(--accent-purple)' }} />
                 <div>
-                  <h3 style={{ fontSize: '1.05rem', fontWeight: 600 }}>Supabase PostgreSQL &amp; Depolama</h3>
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: 600 }}>Platform Bağlantı Durumu</h3>
                   <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    Özel PDF depolama ve veritabanı entegrasyonu
+                    Özel PDF depolama ve veri eşitleme servisleri
                   </p>
                 </div>
               </div>
 
               {isSupabaseConfigured ? (
-                <Badge variant="success" size="sm">Canlı Bağlantı Aktif</Badge>
+                <Badge variant="success" size="sm">Bağlantı Aktif ✓</Badge>
               ) : (
-                <Badge variant="warning" size="sm">Yerel Test Modu</Badge>
+                <Badge variant="warning" size="sm">Çevrimdışı / Yerel Mod</Badge>
               )}
             </div>
 
-            <div 
-              style={{ 
-                padding: '1rem', 
-                background: 'var(--bg-secondary)', 
-                borderRadius: '12px', 
-                fontSize: '0.85rem', 
-                color: 'var(--text-secondary)', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                gap: '0.75rem',
+            <div
+              style={{
+                padding: '1rem',
+                background: 'var(--bg-secondary)',
+                borderRadius: '12px',
+                fontSize: '0.85rem',
+                color: 'var(--text-secondary)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.6rem',
                 border: '1px solid var(--border-color-subtle)'
               }}
             >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                  Supabase Proje URL:
-                </span>
-                <code 
-                  style={{ 
-                    color: 'var(--accent-cyan)', 
-                    fontSize: '0.8rem',
-                    background: 'rgba(0,0,0,0.3)',
-                    padding: '0.35rem 0.6rem',
-                    borderRadius: '8px',
-                    wordBreak: 'break-all'
-                  }}
+              {[
+                { label: 'Kullanıcı Kimlik Doğrulama', ok: true },
+                { label: 'Ödev PDF Depolama', ok: isSupabaseConfigured },
+                { label: 'Gerçek Zamanlı Bildirimler', ok: isSupabaseConfigured },
+                { label: 'Sınıf & Ödev Veritabanı', ok: isSupabaseConfigured },
+              ].map(item => (
+                <div
+                  key={item.label}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
                 >
-                  {import.meta.env.VITE_SUPABASE_URL || 'Yapılandırılmadı (.env dosyası kontrol edin)'}
-                </code>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                    Anon / Public API Key:
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setShowApiKey(!showApiKey)}
+                  <span style={{ fontSize: '0.82rem' }}>{item.label}</span>
+                  <span
                     style={{
-                      background: 'transparent',
-                      border: 'none',
-                      color: 'var(--accent-cyan)',
                       fontSize: '0.75rem',
-                      cursor: 'pointer',
+                      fontWeight: 600,
+                      color: item.ok ? 'var(--color-success)' : 'var(--color-warning)',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '0.25rem'
+                      gap: '0.3rem'
                     }}
                   >
-                    {showApiKey ? <EyeOff size={13} /> : <Eye size={13} />}
-                    {showApiKey ? 'Gizle' : 'Göster'}
-                  </button>
+                    {item.ok ? '● Aktif' : '○ Bekleniyor'}
+                  </span>
                 </div>
-                <code 
-                  style={{ 
-                    color: 'var(--accent-cyan)', 
-                    fontSize: '0.8rem',
-                    background: 'rgba(0,0,0,0.3)',
-                    padding: '0.35rem 0.6rem',
-                    borderRadius: '8px',
-                    wordBreak: 'break-all'
-                  }}
-                >
-                  {import.meta.env.VITE_SUPABASE_ANON_KEY 
-                    ? (showApiKey ? import.meta.env.VITE_SUPABASE_ANON_KEY : '••••••••••••••••••••••••••••••••')
-                    : 'Yapılandırılmadı (.env)'}
-                </code>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.35rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                <span style={{ fontSize: '0.8rem' }}>Özel Depolama Kovası (Storage Bucket):</span>
-                <code style={{ color: 'var(--text-primary)', fontWeight: 600 }}>homework-submissions</code>
-              </div>
+              ))}
             </div>
           </Card>
 
@@ -715,7 +676,7 @@ export function Settings() {
             </div>
 
             <div style={{ padding: '1.25rem', borderRadius: '14px', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', fontSize: '0.875rem', lineHeight: 1.6, color: 'var(--text-secondary)' }}>
-              Bu edebiyat ödev teslim ve değerlendirme platformu, okulumuzun ihtiyaçlarına özel olarak <strong>DVLP Platform</strong> yazılım şirketi ve geliştirici ekibi tarafından hayata geçirilmiştir. Modern bulut teknolojileri (React, Supabase, Vercel) kullanılarak okul ortamında maksimum hız, güvenlik ve kolay kullanım sunmak üzere optimize edilmiştir.
+              Bu edebiyat ödev teslim ve değerlendirme platformu, okulumuzun ihtiyaçlarına özel olarak <strong>DVLP Platform</strong> yazılım şirketi ve geliştirici ekibi tarafından hayata geçirilmiştir. Modern bulut altyapısı ve en güncel web teknolojileri kullanılarak okul ortamında maksimum hız, güvenlik ve kolay kullanım sunmak üzere optimize edilmiştir.
             </div>
 
             {/* Direct Contact Channels */}
