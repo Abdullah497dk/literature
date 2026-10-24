@@ -24,9 +24,14 @@ import {
   Lock,
   RefreshCw,
   LogOut,
-  Info
+  Info,
+  Phone,
+  Mail,
+  Headphones
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { DvlpLogo } from '../../components/common/DvlpLogo';
+import { InstagramIcon } from '../../components/common/Icons';
 
 export function Settings() {
   const { isSupabaseConfigured, role, profile, user, signOut } = useAuth();
@@ -177,7 +182,8 @@ export function Settings() {
           { id: 'general', label: 'Genel & Tema', icon: Moon },
           { id: 'notifications', label: 'Bildirimler', icon: Bell },
           { id: 'pdf', label: 'PDF & Okuma', icon: FileText },
-          { id: 'system', label: 'Sistem & Güvenlik', icon: Database }
+          { id: 'system', label: 'Sistem & Güvenlik', icon: Database },
+          { id: 'about', label: 'Geliştirici & DVLP', icon: Sparkles }
         ].map(tab => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -665,6 +671,96 @@ export function Settings() {
               <li>Kullanıcı rolleri güvenilir veritabanı kayıtları ile korunur, tarayıcı üzerinden yetki yükseltilemez.</li>
               <li>Tüm PDF dosyaları özel depolama alanında tutulur ve yalnızca yetkili imzalı kısa süreli URL'lerle açılır.</li>
             </ul>
+          </Card>
+        </div>
+      )}
+
+      {/* About & DVLP Platform Tab */}
+      {activeTab === 'about' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* Main DVLP Showcase Card */}
+          <Card glow style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <DvlpLogo size="lg" subtitle="Edebiyat" />
+                <div>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>DVLP Platform</h3>
+                  <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: '0.2rem 0 0 0' }}>
+                    Building Developers. Building the Future.
+                  </p>
+                </div>
+              </div>
+
+              <a
+                href="https://dvlp-platform.vercel.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                  padding: '0.6rem 1.15rem',
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #8B5CF6 0%, #22D3EE 100%)',
+                  color: '#ffffff',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  textDecoration: 'none',
+                  boxShadow: '0 4px 16px rgba(139, 92, 246, 0.4)'
+                }}
+              >
+                <span>dvlp-platform.vercel.app</span>
+                <ExternalLink size={15} />
+              </a>
+            </div>
+
+            <div style={{ padding: '1.25rem', borderRadius: '14px', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', fontSize: '0.875rem', lineHeight: 1.6, color: 'var(--text-secondary)' }}>
+              Bu edebiyat ödev teslim ve değerlendirme platformu, okulumuzun ihtiyaçlarına özel olarak <strong>DVLP Platform</strong> yazılım şirketi ve geliştirici ekibi tarafından hayata geçirilmiştir. Modern bulut teknolojileri (React, Supabase, Vercel) kullanılarak okul ortamında maksimum hız, güvenlik ve kolay kullanım sunmak üzere optimize edilmiştir.
+            </div>
+
+            {/* Direct Contact Channels */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+              <div style={{ padding: '1rem', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#10b981', fontWeight: 600, fontSize: '0.8rem', marginBottom: '0.35rem' }}>
+                  <Phone size={15} />
+                  <span>Telefon & WhatsApp</span>
+                </div>
+                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>0543 141 30 99</div>
+                <a href="tel:05431413099" style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)', textDecoration: 'none', marginTop: '0.4rem', display: 'inline-block' }}>
+                  Hemen Ara / WhatsApp →
+                </a>
+              </div>
+
+              <div style={{ padding: '1rem', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-purple)', fontWeight: 600, fontSize: '0.8rem', marginBottom: '0.35rem' }}>
+                  <Mail size={15} />
+                  <span>Destek E-Postası</span>
+                </div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', wordBreak: 'break-all' }}>dvlp.platform@gmail.com</div>
+                <a href="mailto:dvlp.platform@gmail.com" style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)', textDecoration: 'none', marginTop: '0.4rem', display: 'inline-block' }}>
+                  E-posta Gönder →
+                </a>
+              </div>
+
+              <div style={{ padding: '1rem', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ec4899', fontWeight: 600, fontSize: '0.8rem', marginBottom: '0.35rem' }}>
+                  <InstagramIcon size={15} color="#ec4899" />
+                  <span>Instagram</span>
+                </div>
+                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>@dvlp.platform</div>
+                <a href="https://instagram.com/dvlp.platform" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)', textDecoration: 'none', marginTop: '0.4rem', display: 'inline-block' }}>
+                  Profili Görüntüle ↗
+                </a>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '0.5rem' }}>
+              <Link to="/contact" style={{ textDecoration: 'none' }}>
+                <Button variant="primary" icon={Headphones}>
+                  Tam Destek &amp; Geri Bildirim Sayfasına Git
+                </Button>
+              </Link>
+            </div>
           </Card>
         </div>
       )}

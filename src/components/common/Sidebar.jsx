@@ -13,7 +13,9 @@ import {
   Bell,
   User,
   Settings,
-  BookOpen
+  BookOpen,
+  Headphones,
+  ExternalLink
 } from 'lucide-react';
 
 export function Sidebar({ isOpen, onClose }) {
@@ -24,6 +26,7 @@ export function Sidebar({ isOpen, onClose }) {
     { to: '/my-class', label: 'Sınıfım', icon: GraduationCap },
     { to: '/submissions/new', label: 'Ödev Yükle', icon: UploadCloud },
     { to: '/notifications', label: 'Bildirimler', icon: Bell },
+    { to: '/contact', label: 'Destek & İletişim', icon: Headphones },
     { to: '/profile', label: 'Profilim', icon: User },
     { to: '/settings', label: 'Ayarlar', icon: Settings }
   ];
@@ -34,6 +37,7 @@ export function Sidebar({ isOpen, onClose }) {
     { to: '/teacher/assignments', label: 'Ödev Başlıkları', icon: BookOpen },
     { to: '/teacher/requests', label: 'Katılım Talepleri', icon: Inbox },
     { to: '/notifications', label: 'Bildirimler', icon: Bell },
+    { to: '/contact', label: 'Destek & İletişim', icon: Headphones },
     { to: '/profile', label: 'Profilim', icon: User },
     { to: '/settings', label: 'Ayarlar', icon: Settings }
   ];
@@ -46,6 +50,7 @@ export function Sidebar({ isOpen, onClose }) {
     { to: '/admin/requests', label: 'Katılım Talepleri', icon: Inbox },
     { to: '/admin/submissions', label: 'Tüm Ödevler', icon: FileCheck2 },
     { to: '/notifications', label: 'Bildirimler', icon: Bell },
+    { to: '/contact', label: 'Destek & İletişim', icon: Headphones },
     { to: '/profile', label: 'Profilim', icon: User },
     { to: '/settings', label: 'Ayarlar', icon: Settings }
   ];
@@ -151,31 +156,73 @@ export function Sidebar({ isOpen, onClose }) {
         {/* Brand signature in footer */}
         <div
           style={{
-            padding: '1.25rem',
+            padding: '1rem 1.15rem',
             borderTop: '1px solid var(--border-color)',
             backgroundColor: 'var(--bg-primary)'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-              DVLP Edebiyat
-            </span>
-            <span 
-              style={{ 
-                fontSize: '0.65rem', 
-                background: 'rgba(139, 92, 246, 0.15)', 
-                color: 'var(--accent-purple)', 
-                padding: '0.1rem 0.4rem', 
-                borderRadius: '9999px',
-                fontWeight: 600
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                DVLP Platform
+              </span>
+              <span 
+                style={{ 
+                  fontSize: '0.62rem', 
+                  background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(34, 211, 238, 0.2) 100%)', 
+                  color: 'var(--accent-cyan)', 
+                  padding: '0.1rem 0.45rem', 
+                  borderRadius: '9999px',
+                  fontWeight: 700,
+                  border: '1px solid rgba(34, 211, 238, 0.3)'
+                }}
+              >
+                PROD v1.0
+              </span>
+            </div>
+          </div>
+          
+          <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', lineHeight: 1.4, margin: '0 0 0.65rem 0' }}>
+            Bu sistem okulumuz için <strong>DVLP</strong> tarafından geliştirilmiştir.
+          </p>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+            <a
+              href="https://dvlp-platform.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                fontSize: '0.72rem',
+                color: 'var(--accent-purple)',
+                textDecoration: 'none',
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.25rem'
+              }}
+              title="DVLP Ana Web Sitesi"
+            >
+              <span>dvlp-platform ↗</span>
+            </a>
+
+            <NavLink
+              to="/contact"
+              onClick={() => {
+                if (window.innerWidth < 1024) onClose();
+              }}
+              style={{
+                fontSize: '0.7rem',
+                color: 'var(--text-secondary)',
+                textDecoration: 'none',
+                background: 'rgba(255, 255, 255, 0.04)',
+                padding: '0.2rem 0.5rem',
+                borderRadius: '6px',
+                border: '1px solid var(--border-color)'
               }}
             >
-              v1.0
-            </span>
+              Destek Hattı
+            </NavLink>
           </div>
-          <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
-            Building Developers. Building the Future.
-          </p>
         </div>
       </aside>
 

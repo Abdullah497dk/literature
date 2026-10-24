@@ -477,9 +477,41 @@ export function Login() {
           )}
         </div>
 
-        {/* Footer brand note */}
-        <div style={{ textAlign: 'center', marginTop: '2rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-          DVLP Platform • Güvenli Edebiyat Ödevi Teslim Sistemi
+        {/* Footer brand note & support links */}
+        <div style={{ textAlign: 'center', marginTop: '1.75rem', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            Giriş veya kayıtla ilgili bir sorun mu yaşıyorsunuz?{' '}
+            <Link to="/contact" style={{ color: 'var(--accent-cyan)', fontWeight: 600, textDecoration: 'none' }}>
+              Destek & İletişim
+            </Link>
+          </div>
+
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+            Bu platform okulumuz için{' '}
+            <a
+              href="https://dvlp-platform.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: 'var(--accent-purple)', fontWeight: 600, textDecoration: 'none' }}
+            >
+              DVLP Platform ↗
+            </a>{' '}
+            tarafından geliştirilmiştir.
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.75rem', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+            <a href="tel:05431413099" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>
+              📞 0543 141 30 99
+            </a>
+            <span>•</span>
+            <a href="mailto:dvlp.platform@gmail.com" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>
+              ✉️ dvlp.platform@gmail.com
+            </a>
+            <span>•</span>
+            <a href="https://instagram.com/dvlp.platform" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>
+              📷 @dvlp.platform
+            </a>
+          </div>
         </div>
       </div>
     </div>

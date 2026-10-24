@@ -8,6 +8,7 @@ import { ProtectedRoute } from './components/layout/ProtectedRoute';
 // Public Pages
 import { Login } from './pages/public/Login';
 import { ForgotPassword, ResetPassword } from './pages/public/ForgotPassword';
+import { Contact } from './pages/public/Contact';
 
 // Shared Pages
 import { DashboardRouter } from './pages/shared/DashboardRouter';
@@ -47,6 +48,10 @@ export function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/destek" element={<Navigate to="/contact" replace />} />
+            <Route path="/support" element={<Navigate to="/contact" replace />} />
+            <Route path="/feedback" element={<Navigate to="/contact" replace />} />
 
             {/* Authenticated Layout */}
             <Route

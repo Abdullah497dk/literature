@@ -223,7 +223,7 @@ export function ProtectedRoute({ children, allowedRoles }) {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Button 
               variant="primary" 
               icon={RefreshCw} 
@@ -235,6 +235,14 @@ export function ProtectedRoute({ children, allowedRoles }) {
             <Button variant="secondary" icon={LogOut} onClick={() => signOut()}>
               Çıkış Yap
             </Button>
+          </div>
+
+          <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border-color)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            Onay süreci geciktiyse veya desteğe ihtiyacınız varsa:{' '}
+            <a href="/contact" style={{ color: 'var(--accent-cyan)', fontWeight: 600, textDecoration: 'none' }}>
+              Destek & İletişim Hattı
+            </a>
+            {' '}(WhatsApp: 0543 141 30 99)
           </div>
         </div>
       </div>

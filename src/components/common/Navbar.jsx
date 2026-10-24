@@ -15,7 +15,9 @@ import {
   FileText,
   MessageSquare,
   UserPlus,
-  ChevronDown
+  ChevronDown,
+  Headphones,
+  ExternalLink
 } from 'lucide-react';
 
 export function Navbar({ onToggleSidebar, isSidebarOpen }) {
@@ -458,6 +460,53 @@ export function Navbar({ onToggleSidebar, isSidebarOpen }) {
                   >
                     <Settings size={16} style={{ color: 'var(--accent-cyan)' }} /> Ayarlar
                   </Link>
+                  <Link
+                    to="/contact"
+                    onClick={() => setShowUserDropdown(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.6rem',
+                      padding: '0.55rem 0.75rem',
+                      borderRadius: '10px',
+                      color: 'var(--text-secondary)',
+                      fontSize: '0.85rem',
+                      textDecoration: 'none',
+                      transition: 'background 0.15s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-secondary)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <Headphones size={16} style={{ color: '#10b981' }} /> Destek & İletişim
+                  </Link>
+                  <a
+                    href="https://dvlp-platform.vercel.app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setShowUserDropdown(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '0.6rem',
+                      padding: '0.55rem 0.75rem',
+                      borderRadius: '10px',
+                      color: 'var(--accent-purple)',
+                      fontSize: '0.825rem',
+                      fontWeight: 500,
+                      textDecoration: 'none',
+                      transition: 'background 0.15s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                      <ExternalLink size={15} /> DVLP Platform
+                    </div>
+                    <span style={{ fontSize: '0.65rem', background: 'rgba(139, 92, 246, 0.15)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                      dvlp.dev
+                    </span>
+                  </a>
                   <button
                     type="button"
                     onClick={handleLogout}

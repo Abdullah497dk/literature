@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Navbar } from '../common/Navbar';
 import { Sidebar } from '../common/Sidebar';
+import { Footer } from '../common/Footer';
 import { ConfigNoticeBanner } from '../common/ConfigNoticeBanner';
 import { useAuth } from '../../context/AuthContext';
 
@@ -37,15 +38,19 @@ export function AppLayout() {
           style={{
             flex: 1,
             minWidth: 0,
-            padding: '2rem 1.5rem 4rem 1.5rem',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            padding: '2rem 1.5rem 0 1.5rem',
             marginLeft: 0,
             transition: 'margin-left 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
           }}
           className="dvlp-main-content"
         >
-          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ maxWidth: '1200px', width: '100%', margin: '0 auto', paddingBottom: '3rem' }}>
             <Outlet />
           </div>
+          <Footer />
         </main>
       </div>
 

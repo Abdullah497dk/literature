@@ -138,6 +138,22 @@ export function ForgotPassword() {
             </form>
           )}
         </div>
+
+        <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+          Sorun mu yaşıyorsunuz?{' '}
+          <Link to="/contact" style={{ color: 'var(--accent-cyan)', fontWeight: 600, textDecoration: 'none' }}>
+            Destek & İletişim
+          </Link>
+          {' '}•{' '}
+          <a
+            href="https://dvlp-platform.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: 'var(--accent-purple)', textDecoration: 'none' }}
+          >
+            DVLP Platform ↗
+          </a>
+        </div>
       </div>
     </div>
   );
